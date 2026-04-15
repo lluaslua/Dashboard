@@ -2,6 +2,40 @@ import { Zap, Gauge, Server, AlertTriangle, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardTitle } from "../ui/card";
 
 
+type SystemStatus = "ONLINE" | "ALERT" | "OFFLINE";
+
+interface ApiStats {
+  id: string;
+  hourlyProduction: number;
+  efficiency: number;
+  status: SystemStatus;
+  alerts: [];
+}
+
+async function fetchSystems(): Promise<SystemData[]> {
+  try {
+    const res = await fetch("https://teste-front-api-production.up.railway.app/systems", {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) {
+      console.error("API response error:", res.statusText);
+      return [];
+    }
+
+    const json = await res.json();
+    
+    if (json && Array.isArray(json.data)) {
+      return json.data;
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Failed to fetch systems:", error);
+    return [];
+  }
+}
+
 const stats = [
   {
     label: "Energia Gerada Hoje",

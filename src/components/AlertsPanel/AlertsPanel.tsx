@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ChevronRight } from "lucide-react";
-import { timeElapsed } from "@/utils/formatters";
+import { timeElapsed, timeFormatter } from "@/utils/time-utils";
 import { resolveAlertIcon } from "@/utils/icons";
 
 type AlertPriorityLevel = "HIGH" | "MEDIUM" | "LOW";
@@ -143,7 +143,7 @@ export async function AlertsPanel() {
                         </Badge>
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5">{alert.system.customer || "Descrição Vazia"}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{timeElapsed(alert.createdAt) || "Recente"}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{"há " + timeFormatter(timeElapsed(alert.createdAt)) || "Recente"}</p>
                     </div>
                   </div>
                   {index < alerts.length - 1 && <Separator className="opacity-50" />}

@@ -1,11 +1,14 @@
-export function timeElapsed(dateIso: string): string {
-  if (!dateIso) return "";
+export function timeElapsed(dateIso: string): number {
+  if (!dateIso) return 0;
   
-  const sec = Math.floor((Date.now() - new Date(dateIso).getTime()) / 1000);
+  return ((Date.now() - new Date(dateIso).getTime()) / 1000);
+   
+}
+
+export function timeFormatter(time: number): string {
+  if (Math.floor(time) < 60) return "menos de um minuto";
   
-  if (sec < 60) return "menos de um minuto";
-  
-  const min = Math.floor(sec / 60);
+  const min = Math.floor(Math.floor(time) / 60);
   if (min < 60) return `${min} minute${min > 1 ? 's' : ''}`;
   
   const hr = Math.floor(min / 60);
