@@ -18,17 +18,14 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 
+
 export const description = "A line chart with dots"
 
-const chartData = [
-  { Date: "14/03", kwh: 210},
-  { Date: "15/03", kwh: 260},
-  { Date: "16/03", kwh: 200},
-  { Date: "17/03", kwh: 290},
-  { Date: "18/03", kwh: 270},
-  { Date: "19/03", kwh: 220},
-  { Date: "20/03", kwh: 300}
-]
+
+
+interface EnergyChartProps {
+  chartData: { Date: string; kwh: number }[];
+}
 
 const chartConfig = {
   kwh: {
@@ -41,9 +38,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function EnergyChart() {
+export function EnergyChart({ chartData }: EnergyChartProps) {
 
-  const maxKwh = Math.max(...chartData.map((data) => data.kwh));
+  const maxKwh = chartData.length > 0 ? Math.max(...chartData.map((data) => data.kwh)) : 150;
   const maxTick = Math.ceil(maxKwh / 150) * 150;
   const dynamicTicks = [];
   for (let i = 0; i <= maxTick; i += 150) {

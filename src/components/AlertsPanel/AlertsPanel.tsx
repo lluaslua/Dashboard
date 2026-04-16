@@ -6,24 +6,12 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronRight } from "lucide-react";
 import { timeElapsed, timeFormatter } from "@/utils/time-utils";
 import { resolveAlertIcon } from "@/utils/icons";
-
-type AlertPriorityLevel = "HIGH" | "MEDIUM" | "LOW";
-
-
-interface ApiAlert {
-  systemId: string;
-  title: string;
-  customer: string;
-  priorityLevel: AlertPriorityLevel;
-  createdAt: string;
-
-  system: {
-    customer: string;
-  }
-}
+import { SystemAlert, PriorityLevel } from "@/types/energy-system";
 
 
-async function getAlerts(): Promise<ApiAlert[]> {
+
+
+async function getAlerts(): Promise<SystemAlert[]> {
   try {
    
     const res = await fetch("https://teste-front-api-production.up.railway.app/alerts", {
@@ -55,7 +43,7 @@ async function getAlerts(): Promise<ApiAlert[]> {
       
       const possibleArray = Object.values(data).find(val => Array.isArray(val));
       if (possibleArray) {
-        return possibleArray as ApiAlert[];
+        return possibleArray as SystemAlert[];
       }
     }
 
@@ -69,7 +57,7 @@ async function getAlerts(): Promise<ApiAlert[]> {
 }
 
 
-const priorityLevelConfig: Record<AlertPriorityLevel, { badge: string; iconBg: string; iconColor: string; label: string }> = {
+const priorityLevelConfig: Record<PriorityLevel, { badge: string; iconBg: string; iconColor: string; label: string }> = {
   HIGH: {
     badge: "bg-red-100 text-red-600 hover:bg-red-100 border-0",
     iconBg: "bg-red-50",
@@ -122,13 +110,13 @@ export async function AlertsPanel() {
           ) : (
 
           <div className="px-6 pb-4 space-y-1">
-            {alerts.map((alert, index) => {
+            {safeAlerts.map((alert, index) => {
               const Icon = resolveAlertIcon(alert.title);
               const config = priorityLevelConfig[alert.priorityLevel] || priorityLevelConfig["LOW"];
 
 
               return (
-                <div key={alert.systemId}>
+                <div key={alert.id}>
                   <div className="flex items-start gap-3 py-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer px-2 -mx-2">
                     <div className={`w-8 h-8 rounded-lg ${config.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
                       <Icon className={`w-4 h-4 ${config.iconColor}`} />
@@ -142,11 +130,11 @@ export async function AlertsPanel() {
                           {config.label}
                         </Badge>
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{alert.system.customer || "Descrição Vazia"}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{alert.system?.customer}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{"há " + timeFormatter(timeElapsed(alert.createdAt)) || "Recente"}</p>
                     </div>
                   </div>
-                  {index < alerts.length - 1 && <Separator className="opacity-50" />}
+                  {index < safeAlerts.length - 1 && <Separator className="opacity-50" />}
                 </div>
               );
             })}

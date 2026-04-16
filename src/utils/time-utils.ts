@@ -23,3 +23,10 @@ export function timeFormatter(time: number): string {
   const y = Math.floor(d / 365);
   return `${y} ano${y > 1 ? 's' : ''}`;
 }
+
+export const formatToDDMM = (isoString: string): string => {
+
+  const [year, month, day] = isoString.split('T')[0].split('-');
+  
+  return `${day}/${month}`;
+};
