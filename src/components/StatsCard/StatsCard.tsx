@@ -1,11 +1,47 @@
 import { Zap, Gauge, Server, AlertTriangle, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardTitle } from "../ui/card";
+import { EnergySystem } from "@/types/energy-system";
+import { summarizeSystemsData } from "@/utils/stats-utils";
 
 
-const stats = [
+
+async function fetchSystems(): Promise<EnergySystem[]> {
+  try {
+    const res = await fetch("https://teste-front-api-production.up.railway.app/systems", {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) {
+      console.error("API response error:", res.statusText);
+      return [];
+    }
+
+    const json = await res.json();
+    
+    if (json && Array.isArray(json.data)) {
+      return json.data;
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Failed to fetch systems:", error);
+    return [];
+  }
+}
+
+
+
+
+export async function StatsCard() {
+
+  const systems = await fetchSystems();
+  const data = summarizeSystemsData(systems);
+  
+
+const statsConfig = [
   {
     label: "Energia Gerada Hoje",
-    value: "1,847.2",
+    value: data.dailyEnergy,
     unit: "kWh",
     icon: Zap, 
     iconBg: "bg-blue-50",
@@ -13,7 +49,7 @@ const stats = [
   },
   {
     label: "Produção Mensal",
-    value: "45.8",
+    value: data.monthlyEnergy,
     unit: "MWh",
     icon: TrendingUp,
     iconBg: "bg-green-50",
@@ -21,7 +57,7 @@ const stats = [
   },
   {
     label: "Sistemas Online",
-    value: "124",
+    value: data.onlineCount,
     unit: "",
     icon: Server,
     iconBg: "bg-blue-50",
@@ -29,7 +65,7 @@ const stats = [
   },
   {
     label: "Sistemas com Alerta",
-    value: "8",
+    value: data.alertCount,
     unit: "",
     icon: AlertTriangle,
     iconBg: "bg-yellow-50",
@@ -37,7 +73,7 @@ const stats = [
   },
   {
     label: "Eficiência Média",
-    value: "94.2",
+    value: data.averageEfficiency,
     unit: "%",
     icon: Gauge,
     iconBg: "bg-purple-50",
@@ -45,15 +81,13 @@ const stats = [
   },
 ];
 
-export function StatsCard() {
-
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 xl:grid-cols-6 gap-3 ">
-      {stats.map((stat) => {
+      {statsConfig.map((stat) => {
         const Icon = stat.icon;
         return (
           <Card key={stat.label} className="border border-gray-100 shadow-sm bg-white aspect-[232/174] ">
-            <CardContent className="">
+            <CardContent>
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0 pb-4 p-1">
                   <CardTitle className="text-sm md:text-xs xl:text-base text-gray-500 leading-tight">{stat.label}</CardTitle>

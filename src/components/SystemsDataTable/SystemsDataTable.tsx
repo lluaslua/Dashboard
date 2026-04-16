@@ -20,62 +20,46 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { EnergySystem, SystemStatus } from "@/types/energy-system"
+import { timeFormatter, timeElapsed } from "@/utils/time-utils"
+import { calculateDailyEnergy } from "@/utils/stats-utils"
 
-
-export type SystemStatus = "Online" | "Alerta" | "Offline"
-
-export type SystemData = {
-  id: string
-  sistema: string
-  cliente: string
-  cidade: string
-  producaoHoje: number
-  eficiencia: number
-  status: SystemStatus
-  ultimaLeitura: string
+interface SystemsDataTableProps {
+  systems: EnergySystem[];
 }
 
 
-const data: SystemData[] = [
-  { id: "1", sistema: "Usina Solar Campinas", cliente: "Energética S.A.", cidade: "Campinas - SP", producaoHoje: 245.5, eficiencia: 97.8, status: "Online", ultimaLeitura: "há 2 min" },
-  { id: "2", sistema: "Painel Residencial Vila Olímpia", cliente: "João Ferreira", cidade: "São Paulo - SP", producaoHoje: 32.1, eficiencia: 89.2, status: "Alerta", ultimaLeitura: "há 5 min" },
-  { id: "3", sistema: "Sistema Industrial Jundiaí", cliente: "Indústria Beta Ltda", cidade: "Jundiaí - SP", producaoHoje: 512.8, eficiencia: 95.5, status: "Online", ultimaLeitura: "há 1 min" },
-  { id: "4", sistema: "Fazenda Solar Ribeirão", cliente: "Agro Solar Corp", cidade: "Ribeirão Preto - SP", producaoHoje: 0.0, eficiencia: 0.0, status: "Offline", ultimaLeitura: "há 2 horas" },
-  { id: "5", sistema: "Condomínio Green Tower", cliente: "Condomínio Green Tower", cidade: "Santos - SP", producaoHoje: 128.4, eficiencia: 92.1, status: "Online", ultimaLeitura: "há 3 min" },
-  { id: "6", sistema: "Shopping Center Sorocaba", cliente: "Mall Group S.A.", cidade: "Sorocaba - SP", producaoHoje: 389.7, eficiencia: 88.5, status: "Alerta", ultimaLeitura: "há 7 min" },
-]
 
-
-export const columns: ColumnDef<SystemData>[] = [
+export const columns: ColumnDef<EnergySystem>[] = [
   {
-    accessorKey: "sistema",
+    accessorKey: "name",
     header: "Sistema",
-    cell: ({ row }) => <span className="font-semibold text-gray-900">{row.getValue("sistema")}</span>,
+    cell: ({ row }) => <span className="font-semibold text-gray-900">{row.getValue("name")}</span>,
   },
   {
-    accessorKey: "cliente",
+    accessorKey: "customer",
     header: "Cliente",
-    cell: ({ row }) => <span className="text-gray-500">{row.getValue("cliente")}</span>,
+    cell: ({ row }) => <span className="text-gray-500">{row.getValue("customer")}</span>,
   },
   {
-    accessorKey: "cidade",
+    accessorKey: "city",
     header: "Cidade",
-    cell: ({ row }) => <span className="text-gray-500">{row.getValue("cidade")}</span>,
+    cell: ({ row }) => <span className="text-gray-500">{row.getValue("city")}</span>,
   },
   {
-    accessorKey: "producaoHoje",
+    accessorKey: "hourlyProduction",
     header: () => <div className="text-right">Produção Hoje</div>,
     cell: ({ row }) => {
-      const valor = parseFloat(row.getValue("producaoHoje"))
-      return <div className="text-right font-medium text-gray-900">{valor.toFixed(1)} kWh</div>
+      const value = calculateDailyEnergy(parseFloat(row.getValue("hourlyProduction")))
+      return <div className="text-right font-medium text-gray-900">{value.toFixed(1)} kWh</div>
     },
   },
   {
-    accessorKey: "eficiencia",
+    accessorKey: "efficiency",
     header: () => <div className="text-right">Eficiência</div>,
     cell: ({ row }) => {
-      const valor = parseFloat(row.getValue("eficiencia"))
-      return <div className="text-right font-medium text-gray-900">{valor.toFixed(1)}%</div>
+      const value = parseFloat(row.getValue("efficiency"))
+      return <div className="text-right font-medium text-gray-900">{value.toFixed(1)}%</div>
     },
   },
   {
@@ -86,14 +70,14 @@ export const columns: ColumnDef<SystemData>[] = [
       
      
       const statusStyles = {
-        Online: "bg-green-50 text-green-700 hover:bg-green-50 border-green-200",
-        Alerta: "bg-yellow-50 text-yellow-700 hover:bg-yellow-50 border-yellow-200",
-        Offline: "bg-red-50 text-red-700 hover:bg-red-50 border-red-200",
+        ONLINE: "bg-green-50 text-green-700 hover:bg-green-50 border-green-200",
+        ALERT: "bg-yellow-50 text-yellow-700 hover:bg-yellow-50 border-yellow-200",
+        OFFLINE: "bg-red-50 text-red-700 hover:bg-red-50 border-red-200",
       }
       const dotStyles = {
-        Online: "bg-green-500",
-        Alerta: "bg-yellow-500",
-        Offline: "bg-red-500",
+        ONLINE: "bg-green-500",
+        ALERT: "bg-yellow-500",
+        OFFLINE: "bg-red-500",
       }
 
       return (
@@ -105,16 +89,16 @@ export const columns: ColumnDef<SystemData>[] = [
     },
   },
   {
-    accessorKey: "ultimaLeitura",
+    accessorKey: "updatedAt",
     header: () => <div className="text-right">Última Leitura</div>,
-    cell: ({ row }) => <div className="text-right text-gray-500">{row.getValue("ultimaLeitura")}</div>,
+    cell: ({ row }) => <div className="text-right text-gray-500">{timeFormatter(timeElapsed(row.getValue("updatedAt")))}</div>,
   },
 ]
 
 
-export function SystemsDataTable() {
+export function SystemsDataTable({ systems }: SystemsDataTableProps) {
   const table = useReactTable({
-    data,
+    data: systems, 
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
