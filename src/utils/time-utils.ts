@@ -26,7 +26,7 @@ export function timeFormatter(time: number): string {
 
 export const formatToDDMM = (isoString: string): string => {
 
-  const [year, month, day] = isoString.split('T')[0].split('-');
+  const [, month, day] = isoString.split('T')[0].split('-');
   
   return `${day}/${month}`;
 };
